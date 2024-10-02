@@ -6,30 +6,55 @@ LANGUAGE
 	~English~
 	~en-us~
 	~snares_check_weapon_immunity/lang/en-us/weidu.tra~
-	~snares_check_weapon_immunity/lang/en-us/game.tra~
 
 BEGIN @1000
 REQUIRE_PREDICATE GAME_IS ~bgee bg2ee iwdee eet~ @1100
-	COPY_EXISTING_REGEXP ~.*\.ITM~ override
-		PATCH_IF (SOURCE_SIZE > 0x71) BEGIN
-			READ_LONG 0x6A featuresOffset
-			READ_SHORT 0x70 numberOfFeatures
-			WHILE (numberOfFeatures > 0) BEGIN
-				READ_BYTE (featuresOffset + (numberOfFeatures - 1) * 0x30) opCode
-				READ_BYTE (featuresOffset + (numberOfFeatures - 1) * 0x30 + 0x08) weaponType
-				PATCH_IF (opCode = 120 && weaponType = 2) BEGIN
-					LPF ADD_ITEM_EQEFFECT
-						INT_VAR
-							opcode			= 206
-							target			= 1
-							parameter1		= RESOLVE_STR_REF(@0)
-							timing			= 2
-							probability1	= 100
-						STR_VAR
-							resource		= ~SPCL411~
-					END
-				END
-				SET numberOfFeatures = (numberOfFeatures - 1)
+	COPY_EXISTING ~SPCL412.SPL~ override
+		READ_LONG 0x08 setSnareName 
+	BUT_ONLY
+
+	COPY_EXISTING ~SPCL411.SPL~ override
+		WRITE_LONG 0x08 setSnareName
+
+	COPY_EXISTING_REGEXP ~.*\.CRE~ override
+		PATCH_IF (SOURCE_SIZE > 0x2D3) BEGIN
+			LPF CLONE_EFFECT
+				INT_VAR
+					match_opcode		= 120
+					match_parameter2	= 2
+					opcode				= 206
+					parameter1			= 0xF00080
+				STR_VAR
+					resource			= ~SPCL411~
 			END
 		END
 	BUT_ONLY
+
+	COPY_EXISTING_REGEXP ~.*\.ITM~ override
+		PATCH_IF (SOURCE_SIZE > 0x71) BEGIN
+			LPF CLONE_EFFECT
+				INT_VAR
+					match_opcode		= 120
+					match_parameter2	= 2
+					opcode				= 206
+					parameter1			= 0xF00080
+				STR_VAR
+					resource			= ~SPCL411~
+			END
+		END
+	BUT_ONLY
+
+	COPY_EXISTING_REGEXP ~.*\.SPL~ override
+		PATCH_IF (SOURCE_SIZE > 0x71) BEGIN
+			LPF CLONE_EFFECT
+				INT_VAR
+					match_opcode		= 120
+					match_parameter2	= 2
+					opcode				= 206
+					parameter1			= 0xF00080
+				STR_VAR
+					resource			= ~SPCL411~
+			END
+		END
+	BUT_ONLY
+
